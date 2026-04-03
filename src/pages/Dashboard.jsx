@@ -1,8 +1,13 @@
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
+import AddTransactionForm from "../features/admin/AddTransactionForm";
 import SummaryCards from "../features/dashboard/SummaryCards";
 import TrendsChart from "../features/dashboard/TrendsChart";
-import TransactionTable from "../features/transactions/TransactionTable"; // Import Table
+import TransactionTable from "../features/transactions/TransactionTable";
 
 const Dashboard = () => {
+  const { role } = useContext(AppContext);
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">
@@ -27,10 +32,16 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 3. Transactions Table Section */}
+      {/* 3. Admin Only: Add Transaction Form */}
+      {role === "admin" && (
+        <div className="mt-6">
+          <AddTransactionForm />
+        </div>
+      )}
+
+      {/* 4. Transactions Table */}
       <TransactionTable />
     </div>
   );
 };
-
 export default Dashboard;

@@ -16,7 +16,7 @@ const TransactionTable = () => {
     return matchesSearch && matchesType;
   });
 
-  // Action: Delete (Only for Admin)
+  // FIXED: Function name match kar diya 'handleDelete' ke sath
   const handleDelete = (id) => {
     if (window.confirm("Delete this transaction?")) {
       setTransactions(transactions.filter((t) => t.id !== id));
@@ -59,7 +59,8 @@ const TransactionTable = () => {
               <th className="px-6 py-4 font-semibold">Category</th>
               <th className="px-6 py-4 font-semibold">Type</th>
               <th className="px-6 py-4 font-semibold text-right">Amount</th>
-              {role === "Admin" && (
+              {/* FIXED: consistent role check (lowercase) */}
+              {role === "admin" && (
                 <th className="px-6 py-4 font-semibold text-center">Actions</th>
               )}
             </tr>
@@ -87,7 +88,8 @@ const TransactionTable = () => {
                   }`}>
                   {t.type === "income" ? "+" : "-"}${t.amount}
                 </td>
-                {role === "Admin" && (
+                {/* FIXED: role check matches "admin" */}
+                {role === "admin" && (
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => handleDelete(t.id)}
