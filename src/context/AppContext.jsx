@@ -5,11 +5,18 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
-  const [role, setRole] = useState("Admin"); // Default Role
+  const [role, setRole] = useState(
+    () => localStorage.getItem("role") || "admin",
+  );
+
+  const handleSetRole = (newRole) => {
+    setRole(newRole);
+    localStorage.setItem("role", newRole);
+  };
 
   return (
     <AppContext.Provider
-      value={{ transactions, setTransactions, role, setRole }}>
+      value={{ transactions, setTransactions, role, setRole: handleSetRole }}>
       {children}
     </AppContext.Provider>
   );
