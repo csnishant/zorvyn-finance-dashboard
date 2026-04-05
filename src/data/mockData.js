@@ -1,7 +1,16 @@
+const now = new Date();
+
+// Helper to get relative dates
+const subDays = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().split("T")[0]; // Returns YYYY-MM-DD
+};
+
 export const initialTransactions = [
   {
     id: "tx-1",
-    date: "2024-03-01",
+    date: subDays(0), // TODAY (Tests 24H)
     category: "Salary",
     amount: 5000,
     type: "income",
@@ -9,7 +18,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-2",
-    date: "2024-03-02",
+    date: subDays(1), // YESTERDAY (Tests 7D)
     category: "Food",
     amount: 150,
     type: "expense",
@@ -17,7 +26,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-3",
-    date: "2024-03-05",
+    date: subDays(3), // 3 DAYS AGO (Tests 7D)
     category: "Freelance",
     amount: 1200,
     type: "income",
@@ -25,7 +34,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-4",
-    date: "2024-03-08",
+    date: subDays(5), // 5 DAYS AGO (Tests 7D)
     category: "Rent",
     amount: 2500,
     type: "expense",
@@ -33,7 +42,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-5",
-    date: "2024-03-10",
+    date: subDays(12), // 12 DAYS AGO (Tests 1M)
     category: "Shopping",
     amount: 450,
     type: "expense",
@@ -41,7 +50,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-6",
-    date: "2024-03-12",
+    date: subDays(18), // 18 DAYS AGO (Tests 1M)
     category: "Investment",
     amount: 800,
     type: "income",
@@ -49,7 +58,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-7",
-    date: "2024-03-15",
+    date: subDays(25), // 25 DAYS AGO (Tests 1M)
     category: "Transport",
     amount: 95,
     type: "expense",
@@ -57,7 +66,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-8",
-    date: "2024-03-18",
+    date: subDays(45), // 1.5 MONTHS AGO (Tests 1Y)
     category: "Utilities",
     amount: 230,
     type: "expense",
@@ -65,7 +74,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-9",
-    date: "2024-03-20",
+    date: subDays(60), // 2 MONTHS AGO (Tests 1Y)
     category: "Salary",
     amount: 5000,
     type: "income",
@@ -73,7 +82,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-10",
-    date: "2024-03-22",
+    date: subDays(120), // 4 MONTHS AGO (Tests 1Y)
     category: "Entertainment",
     amount: 110,
     type: "expense",
@@ -81,7 +90,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-11",
-    date: "2024-03-25",
+    date: subDays(200), // ~7 MONTHS AGO (Tests 1Y)
     category: "Food",
     amount: 280,
     type: "expense",
@@ -89,7 +98,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-12",
-    date: "2024-03-28",
+    date: subDays(300), // ~10 MONTHS AGO (Tests 1Y)
     category: "Investment",
     amount: 4500,
     type: "income",
@@ -97,7 +106,7 @@ export const initialTransactions = [
   },
   {
     id: "tx-13",
-    date: "2024-03-30",
+    date: subDays(400), // OVER A YEAR AGO (Tests ALL only)
     category: "Health",
     amount: 350,
     type: "expense",
