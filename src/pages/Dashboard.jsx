@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import { Activity, Calendar } from "lucide-react";
 
 // Components
-import SummaryCards from "../features/dashboard/SummaryCards";
-import TransactionTable from "../features/transactions/TransactionTable";
-import Insights from "../features/dashboard/Insights";
-import BalanceChart from "../features/charts/BalanceChart";
-import CategoryChart from "../features/charts/CategoryChart";
-import AddTransactionForm from "../features/admin/AddTransactionForm";
+import SummaryCards from "../components/dashboard/SummaryCards";
+import TransactionTable from "../components/transactions/TransactionTable";
+import Insights from "../components/dashboard/Insights";
+import BalanceChart from "../components/visualizations/BalanceChart";
+import CategoryChart from "../components/visualizations/CategoryChart";
+import AddTransactionForm from "../components/admin/AddTransactionForm";
 
 // Premium Minimalist Flower SVG Component
 const FloralDecorative = ({ className }) => (

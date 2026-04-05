@@ -3,8 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Layout/Sidebar";
 import Navbar from "./components/Layout/Navbar";
 import Dashboard from "./pages/Dashboard";
-import TransactionTable from "./features/transactions/TransactionTable";
-import Insights from "./features/dashboard/Insights";
+import TransactionTable from "./components/transactions/TransactionTable";
+import Insights from "./components/dashboard/Insights";
 import { useFinance } from "./hooks/useFinance";
 
 const Settings = () => (
