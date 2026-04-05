@@ -10,7 +10,6 @@ import { initialTransactions } from "../data/mockData";
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  // ✅ Transactions (with localStorage restore)
   const [transactions, setTransactions] = useState(() => {
     try {
       const saved = localStorage.getItem("app_transactions");
@@ -21,7 +20,6 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // ✅ Role (persisted)
   const [role, setRole] = useState(() => {
     try {
       return localStorage.getItem("app_role") || "admin";
@@ -30,16 +28,14 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // ✅ UI States
   const [currentView, setCurrentView] = useState("Dashboard");
   const [timeRange, setTimeRange] = useState("1M");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // ✅ Notifications
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -51,7 +47,7 @@ export const AppProvider = ({ children }) => {
     },
   ]);
 
-  // ✅ Persist data
+  // ✅ PERSIST DATA
   useEffect(() => {
     localStorage.setItem("app_transactions", JSON.stringify(transactions));
   }, [transactions]);
@@ -60,24 +56,38 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem("app_role", role);
   }, [role]);
 
-  // 🔥 ACTIONS
+  // 🔥 GLOBAL FILTER LOGIC (Ab ye logic yahan centrally chalega)
+  const filteredTransactions = useMemo(() => {
+    const now = new Date();
 
+    return transactions.filter((t) => {
+      const tDate = new Date(t.date);
+      const diffTime = now - tDate;
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+      // Filtering by Time Range
+      let matchesTime = true;
+      if (timeRange === "24H") matchesTime = diffDays <= 1 && diffDays >= 0;
+      else if (timeRange === "7D") matchesTime = diffDays <= 7 && diffDays >= 0;
+      else if (timeRange === "1M")
+        matchesTime = diffDays <= 30 && diffDays >= 0;
+      else if (timeRange === "1Y")
+        matchesTime = diffDays <= 365 && diffDays >= 0;
+
+      // Filtering by Search Term
+      const matchesSearch = t.category
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      return matchesTime && matchesSearch;
+    });
+  }, [transactions, timeRange, searchTerm]);
+
+  // 🔥 ACTIONS
   const addTransaction = useCallback((newTx) => {
     const tx = { ...newTx, id: `tx-${Date.now()}` };
-
     setTransactions((prev) => [tx, ...prev]);
-
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        title: "Transaction Added",
-        message: `${tx.type} of ₹${tx.amount}`,
-        type: "success",
-        time: "Just now",
-        unread: true,
-      },
-      ...prev,
-    ]);
+    // Notification logic...
   }, []);
 
   const updateTransaction = useCallback((updatedTx) => {
@@ -98,11 +108,12 @@ export const AppProvider = ({ children }) => {
     setRole(newRole);
   }, []);
 
-  // ✅ Optimized Context Value
+  // ✅ OPTIMIZED CONTEXT VALUE
   const value = useMemo(
     () => ({
-      // data
-      transactions,
+      // Data
+      transactions: filteredTransactions, // 👈 Ab components ko filtered data hi milega
+      allTransactions: transactions, // 👈 Backup ke liye agar kabhi saara data chahiye ho
       role,
       currentView,
       timeRange,
@@ -113,7 +124,7 @@ export const AppProvider = ({ children }) => {
       notifications,
       isSidebarOpen,
 
-      // setters
+      // Setters
       setRole: handleSetRole,
       setCurrentView,
       setTimeRange,
@@ -124,13 +135,14 @@ export const AppProvider = ({ children }) => {
       setNotifications,
       setIsSidebarOpen,
 
-      // actions
+      // Actions
       addTransaction,
       updateTransaction,
       deleteTransaction,
       clearNotifications,
     }),
     [
+      filteredTransactions,
       transactions,
       role,
       currentView,

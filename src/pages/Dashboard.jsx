@@ -14,54 +14,31 @@ import { motion } from "framer-motion";
 import { Calendar, Activity, Cpu } from "lucide-react";
 
 export default function Dashboard() {
+  // Context se filtered data directly uthao
   const { transactions, timeRange, setTimeRange } = useFinance();
 
-  // Helper: normalize type filtering
-  const filterByType = (list, type) =>
-    list.filter((t) => t.type?.toLowerCase() === type.toLowerCase());
-
-  const filteredTransactions = useMemo(() => {
-    const now = new Date();
-    now.setHours(23, 59, 59, 999);
-
-    return transactions.filter((t) => {
-      const tDate = new Date(t.date);
-      const diffTime = Math.abs(now - tDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (timeRange === "24H") return diffDays <= 1;
-      if (timeRange === "7D") return diffDays <= 7;
-      if (timeRange === "1M") return diffDays <= 30;
-      if (timeRange === "1Y") return diffDays <= 365;
-
-      return true;
-    });
-  }, [transactions, timeRange]);
-
+  // Dashboard specific totals calculate karo (using already filtered data)
   const totals = useMemo(() => {
-    const income = filterByType(filteredTransactions, "income").reduce(
-      (sum, t) => sum + Number(t.amount),
-      0,
-    );
+    const income = transactions
+      .filter((t) => t.type?.toLowerCase() === "income")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    const expense = filterByType(filteredTransactions, "expense").reduce(
-      (sum, t) => sum + Number(t.amount),
-      0,
-    );
+    const expense = transactions
+      .filter((t) => t.type?.toLowerCase() === "expense")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     return {
       income,
       expense,
       balance: income - expense,
     };
-  }, [filteredTransactions]);
+  }, [transactions]);
 
-  const timeOptions = ["24H", "7D", "1M", "1Y"];
+  const timeOptions = ["24H", "7D", "1M", "1Y", "ALL"];
 
   return (
-    // Background changed to light slate
     <div className="flex flex-col gap-10 w-full max-w-screen-2xl mx-auto pb-24 px-6 bg-slate-50 min-h-screen">
-      {/* HEADER - Updated colors for light mode */}
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-8 py-10 border-b border-slate-200 relative group/cmd">
         <div className="flex flex-col gap-4 relative z-10">
           <div className="flex items-center gap-3">
@@ -69,7 +46,7 @@ export default function Dashboard() {
               <Activity size={16} strokeWidth={3} />
             </div>
             <span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.6em] translate-y-0.5 italic">
-              Session Reference v8.01
+              Registry v8.01
             </span>
           </div>
           <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
@@ -77,7 +54,7 @@ export default function Dashboard() {
           </h1>
         </div>
 
-        {/* Date Card - White background with shadow */}
+        {/* Date Card */}
         <div className="flex items-center gap-6 px-8 py-4 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-600/20 transition-all group/cal cursor-default">
           <Calendar
             size={20}
@@ -98,7 +75,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* TIME RANGE BUTTONS - Clearer styling */}
+      {/* TIME RANGE SELECTOR */}
       <div className="flex gap-2 p-1 bg-slate-200/50 w-fit rounded-lg">
         {timeOptions.map((t) => (
           <button
@@ -117,21 +94,15 @@ export default function Dashboard() {
       {/* SUMMARY CARDS */}
       <SummaryCards totals={totals} />
 
-      {/* CHARTS - White containers with subtle borders */}
+      {/* CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         <div className="lg:col-span-8 flex flex-col gap-8 h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white p-8 sm:p-10 h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden flex flex-col gap-10">
-            <BalanceChart
-              transactions={
-                filteredTransactions.length > 0
-                  ? filteredTransactions
-                  : transactions
-              }
-            />
+            className="bg-white p-8 sm:p-10 h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden">
+            <BalanceChart transactions={transactions} />
           </motion.div>
         </div>
 
@@ -140,7 +111,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-white p-8 h-full min-h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden flex flex-col gap-10">
+            className="bg-white p-8 h-full min-h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden">
             <CategoryChart transactions={transactions} />
           </motion.div>
         </div>
@@ -148,16 +119,16 @@ export default function Dashboard() {
 
       <AddTransactionForm />
 
-      {/* INSIGHTS + TRANSACTION TABLE */}
+      {/* DATA & INSIGHTS */}
       <div className="flex flex-col gap-8">
-        <Insights transactions={filteredTransactions} />
+        <Insights transactions={transactions} />
         <div className="w-full overflow-hidden bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <TransactionTable />
         </div>
       </div>
 
-      {/* DECORATIVE CPU - Darker for visibility */}
-      <div className="fixed bottom-0 right-0 p-10 opacity-[0.05] pointer-events-none group-hover:opacity-10 transition-all duration-[4s]">
+      {/* DECORATIVE BACKGROUND */}
+      <div className="fixed bottom-0 right-0 p-10 opacity-[0.05] pointer-events-none">
         <Cpu size={500} strokeWidth={1} className="rotate-45 text-slate-900" />
       </div>
     </div>
