@@ -7,6 +7,7 @@ import TransactionTable from "../features/transactions/TransactionTable";
 import Insights from "../features/dashboard/Insights";
 import BalanceChart from "../features/charts/BalanceChart";
 import CategoryChart from "../features/charts/CategoryChart";
+import AddTransactionForm from "../features/admin/AddTransactionForm";
 
 // Animations & Icons
 import { motion } from "framer-motion";
@@ -19,14 +20,12 @@ export default function Dashboard() {
   const filterByType = (list, type) =>
     list.filter((t) => t.type?.toLowerCase() === type.toLowerCase());
 
-  // Dashboard.jsx ke andar ye filter logic update karein
   const filteredTransactions = useMemo(() => {
     const now = new Date();
-    now.setHours(23, 59, 59, 999); // Aaj ki date ka end point
+    now.setHours(23, 59, 59, 999);
 
     return transactions.filter((t) => {
       const tDate = new Date(t.date);
-      // Din ka difference nikalne ka sahi tarika
       const diffTime = Math.abs(now - tDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -39,7 +38,6 @@ export default function Dashboard() {
     });
   }, [transactions, timeRange]);
 
-  // CALCULATE TOTALS
   const totals = useMemo(() => {
     const income = filterByType(filteredTransactions, "income").reduce(
       (sum, t) => sum + Number(t.amount),
@@ -61,33 +59,35 @@ export default function Dashboard() {
   const timeOptions = ["24H", "7D", "1M", "1Y"];
 
   return (
-    <div className="flex flex-col gap-10 w-full max-w-screen-2xl mx-auto pb-24">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-8 pb-10 border-b border-white/[0.05] relative group/cmd">
-        <div className="flex flex-col gap-6 relative z-10">
+    // Background changed to light slate
+    <div className="flex flex-col gap-10 w-full max-w-screen-2xl mx-auto pb-24 px-6 bg-slate-50 min-h-screen">
+      {/* HEADER - Updated colors for light mode */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-8 py-10 border-b border-slate-200 relative group/cmd">
+        <div className="flex flex-col gap-4 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand-primary/10 text-brand-primary border border-brand-primary/20 rounded-lg shadow-glow">
+            <div className="p-2 bg-indigo-600/10 text-indigo-600 border border-indigo-600/20 rounded-lg">
               <Activity size={16} strokeWidth={3} />
             </div>
-            <span className="text-[10px] font-black uppercase text-gray-500 tracking-[0.6em] translate-y-0.5 italic">
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.6em] translate-y-0.5 italic">
               Session Reference v8.01
             </span>
           </div>
-          <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase italic leading-none drop-shadow-5xl">
-            Registry <span className="text-brand-primary">Flux</span>
+          <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+            Registry <span className="text-indigo-600">Flux</span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-6 px-8 py-4 glass rounded-2xl border border-white/5 hover:border-brand-primary/20 hover:bg-white/5 transition-all group/cal cursor-default">
+        {/* Date Card - White background with shadow */}
+        <div className="flex items-center gap-6 px-8 py-4 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-600/20 transition-all group/cal cursor-default">
           <Calendar
             size={20}
-            className="text-brand-primary group-hover/cal:rotate-12 transition-transform"
+            className="text-indigo-600 group-hover/cal:rotate-12 transition-transform"
           />
           <div className="flex flex-col leading-none items-start gap-1.5 translate-y-0.5">
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-600 mb-0.5 leading-none italic">
+            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 mb-0.5 leading-none italic">
               Session Date Index
             </span>
-            <span className="text-lg font-black text-white tracking-widest uppercase italic tabular-nums leading-none">
+            <span className="text-lg font-black text-slate-900 tracking-widest uppercase italic tabular-nums leading-none">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "short",
                 month: "short",
@@ -98,16 +98,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* TIME RANGE BUTTONS */}
-      <div className="flex gap-2">
+      {/* TIME RANGE BUTTONS - Clearer styling */}
+      <div className="flex gap-2 p-1 bg-slate-200/50 w-fit rounded-lg">
         {timeOptions.map((t) => (
           <button
             key={t}
             onClick={() => setTimeRange(t)}
-            className={`px-3 py-1 rounded-md text-xs font-bold ${
+            className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
               timeRange === t
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-600"
+                ? "bg-white text-indigo-600 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             }`}>
             {t}
           </button>
@@ -117,14 +117,14 @@ export default function Dashboard() {
       {/* SUMMARY CARDS */}
       <SummaryCards totals={totals} />
 
-      {/* CHARTS */}
+      {/* CHARTS - White containers with subtle borders */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         <div className="lg:col-span-8 flex flex-col gap-8 h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass p-8 sm:p-10 h-[600px] shadow-premium border border-white/[0.04] group/visual relative overflow-hidden flex flex-col gap-10">
+            className="bg-white p-8 sm:p-10 h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden flex flex-col gap-10">
             <BalanceChart
               transactions={
                 filteredTransactions.length > 0
@@ -140,22 +140,25 @@ export default function Dashboard() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="glass p-8 h-full min-h-[600px] shadow-premium border border-white/[0.04] group/skew relative overflow-hidden flex flex-col gap-10">
-            {/* Pass all transactions to always show expense data */}
+            className="bg-white p-8 h-full min-h-[600px] rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden flex flex-col gap-10">
             <CategoryChart transactions={transactions} />
           </motion.div>
         </div>
       </div>
 
+      <AddTransactionForm />
+
       {/* INSIGHTS + TRANSACTION TABLE */}
-      <Insights transactions={filteredTransactions} />
-      <div className="w-full overflow-hidden">
-        <TransactionTable />
+      <div className="flex flex-col gap-8">
+        <Insights transactions={filteredTransactions} />
+        <div className="w-full overflow-hidden bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <TransactionTable />
+        </div>
       </div>
 
-      {/* DECORATIVE CPU */}
-      <div className="fixed bottom-0 right-0 p-10 opacity-[0.02] pointer-events-none group-hover:opacity-10 transition-all duration-[4s]">
-        <Cpu size={500} strokeWidth={1} className="rotate-45" />
+      {/* DECORATIVE CPU - Darker for visibility */}
+      <div className="fixed bottom-0 right-0 p-10 opacity-[0.05] pointer-events-none group-hover:opacity-10 transition-all duration-[4s]">
+        <Cpu size={500} strokeWidth={1} className="rotate-45 text-slate-900" />
       </div>
     </div>
   );

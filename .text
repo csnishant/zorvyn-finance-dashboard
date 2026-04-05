@@ -1,0 +1,42 @@
+
+
+src/
+├── components/
+│   ├── ui/
+│   ├── layout/
+│   ├── charts/
+│
+├── features/
+│   ├── dashboard/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── utils/
+│
+│   ├── transactions/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── utils/
+│
+│   ├── insights/
+│   ├── admin/
+│
+├── context/
+│   ├── TransactionContext.jsx
+│   ├── RoleContext.jsx
+│   ├── ThemeContext.jsx
+│
+├── hooks/
+│   ├── useTransactions.js
+│   ├── useRole.js
+│   ├── useLocalStorage.js
+│
+├── utils/
+│   ├── constants.js
+│   ├── formatters.js
+│   ├── stats.js
+│   ├── validators.js
+│
+├── data/
+├── pages/
+├── App.jsx
+└── main.jsx

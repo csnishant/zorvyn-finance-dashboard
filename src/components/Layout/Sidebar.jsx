@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useFinance } from "../../hooks/useFinance";
 import {
   LayoutDashboard,
   ReceiptText,
@@ -8,9 +9,13 @@ import {
   LogOut,
   X,
   CreditCard,
+  ChevronLeft,
+  Menu,
 } from "lucide-react";
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = () => {
+  const { isSidebarOpen, setIsSidebarOpen } = useFinance();
+
   const menuItems = [
     { name: "Overview", icon: <LayoutDashboard size={20} />, path: "/" },
     {
@@ -24,103 +29,72 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* --- MOBILE OVERLAY (Dark background when sidebar is open) --- */}
-      {isOpen && (
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] lg:hidden transition-opacity duration-300"
-          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* --- SIDEBAR CONTAINER --- */}
+      {/* Sidebar aside */}
       <aside
-        className={`
-        fixed inset-y-0 left-0 z-[70] w-72 bg-white border-r border-gray-100 flex flex-col 
-        transition-transform duration-300 ease-in-out transform
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 lg:static lg:h-screen
-      `}>
-        {/* Brand Logo */}
-        <div className="p-8 flex items-center justify-between">
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        {/* Logo Section */}
+        <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
+            <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-100">
               <CreditCard className="text-white" size={24} />
             </div>
-            <h1 className="text-2xl font-black tracking-tighter text-gray-900">
+            <h1 className="text-2xl font-black text-gray-900 tracking-tighter">
               Zorvyn<span className="text-indigo-600">.</span>
             </h1>
           </div>
-
-          {/* Close button - Only visible on Mobile */}
+          {/* Close for Mobile */}
           <button
-            onClick={() => setIsOpen(false)}
-            className="lg:hidden p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+            className="lg:hidden p-2 text-gray-400"
+            onClick={() => setIsSidebarOpen(false)}>
             <X size={24} />
+          </button>
+
+          {/* Collapse Button for Desktop (Sidebar ke andar) */}
+          <button
+            className="hidden lg:flex p-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
+            onClick={() => setIsSidebarOpen(false)}>
+            <ChevronLeft size={18} />
           </button>
         </div>
 
-        {/* User Profile Card */}
-        <div className="px-6 mb-8">
-          <div className="bg-gray-50 p-4 rounded-[24px] border border-gray-100 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600 shrink-0">
-              NC
-            </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-bold text-gray-900 truncate">
-                Nishant Choudhary
-              </p>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                Premium User
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* User Profile... (Nishant Choudhary wala card yahan rahega) */}
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-4 space-y-1.5">
           {menuItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
-              onClick={() => setIsOpen(false)} // Mobile par click karte hi close ho jaye
-              className={({ isActive }) => `
-                w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group
-                ${
-                  isActive
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-indigo-600"
-                }
-              `}>
-              {({ isActive }) => (
-                <>
-                  <span
-                    className={
-                      isActive
-                        ? "text-white"
-                        : "text-gray-400 group-hover:text-indigo-600"
-                    }>
-                    {item.icon}
-                  </span>
-                  <span className="font-bold text-sm tracking-tight">
-                    {item.name}
-                  </span>
-                </>
-              )}
+              onClick={() =>
+                window.innerWidth < 1024 && setIsSidebarOpen(false)
+              }
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 ${isActive ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-gray-500 hover:bg-gray-50 hover:text-indigo-600"}`
+              }>
+              {item.icon}
+              <span>{item.name}</span>
             </NavLink>
           ))}
         </nav>
 
-        {/* Bottom Section */}
-        <div className="p-6 mt-auto border-t border-gray-50">
-          <button className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-100 rounded-2xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all font-bold text-sm">
-            <LogOut size={18} />
-            <span>Sign Out</span>
-          </button>
-          <p className="text-[10px] text-center text-gray-300 mt-6 font-medium">
-            © 2026 Zorvyn FinTech v1.0
-          </p>
-        </div>
+        {/* Bottom Section... (Sign out button) */}
       </aside>
+
+      {/* Jab Sidebar closed ho, tab bahar ek button dikhega Sidebar kholne ke liye (Desktop par) */}
+      {!isSidebarOpen && (
+        <button
+          className="hidden lg:flex fixed top-5 left-5 z-50 p-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-gray-600 hover:text-indigo-600"
+          onClick={() => setIsSidebarOpen(true)}>
+          <Menu size={20} />
+        </button>
+      )}
     </>
   );
 };

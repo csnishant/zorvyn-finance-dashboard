@@ -1,27 +1,54 @@
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Layout/Sidebar";
-import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Layout/Navbar";
+import Dashboard from "./pages/Dashboard";
+import TransactionTable from "./features/transactions/TransactionTable";
+import Insights from "./features/dashboard/Insights";
+import { useFinance } from "./hooks/useFinance";
+
+const Settings = () => (
+  <div className="p-10 text-2xl font-bold text-gray-800">Settings Page</div>
+);
 
 function App() {
+  const { isSidebarOpen } = useFinance();
+
   return (
     <div className="flex min-h-screen bg-gray-50/50">
-      {/* SIDEBAR: Desktop par fixed, Mobile par hidden */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-50 border-r border-gray-100 bg-white">
-        <Sidebar />
-      </aside>
+      {/* SIDEBAR - Isse koi props dene ki zaroorat nahi kyunki ye khud hook use kar raha hai */}
+      <Sidebar />
 
-      {/* MAIN CONTENT Area */}
-      {/* lg:pl-64 sirf badi screen par padding dega */}
-      <div className="flex flex-col flex-1 lg:pl-64 w-full overflow-x-hidden">
-        {/* Navbar sticky rahega aur width full lega */}
+      {/* MAIN CONTENT AREA */}
+      <div
+        className={`flex flex-col flex-1 w-full transition-all duration-300 ease-in-out 
+          ${isSidebarOpen ? "lg:pl-72" : "lg:pl-0"}`} // <-- Dynamic Padding
+      >
         <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
           <Navbar />
         </header>
 
-        {/* Dashboard Content: Mobile par padding kam, Desktop par zyada */}
         <main className="flex-1 w-full overflow-x-hidden">
-          <div className="max-w-[1400px] mx-auto">
-            <Dashboard />
+          <div className="max-w-[1400px] mx-auto p-4 lg:p-8">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route
+                path="/transactions"
+                element={
+                  <div className="glass p-6 rounded-3xl">
+                    <TransactionTable />
+                  </div>
+                }
+              />
+              <Route path="/insights" element={<Insights />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route
+                path="*"
+                element={
+                  <div className="p-10 text-center">404 - Page Not Found</div>
+                }
+              />
+            </Routes>
           </div>
         </main>
       </div>
