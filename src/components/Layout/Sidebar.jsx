@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   ReceiptText,
@@ -11,18 +12,22 @@ import {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
-    { name: "Overview", icon: <LayoutDashboard size={20} />, active: true },
-    { name: "Transactions", icon: <ReceiptText size={20} />, active: false },
-    { name: "Insights", icon: <PieChart size={20} />, active: false },
-    { name: "Settings", icon: <Settings size={20} />, active: false },
+    { name: "Overview", icon: <LayoutDashboard size={20} />, path: "/" },
+    {
+      name: "Transactions",
+      icon: <ReceiptText size={20} />,
+      path: "/transactions",
+    },
+    { name: "Insights", icon: <PieChart size={20} />, path: "/insights" },
+    { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 
   return (
     <>
-      {/* --- MOBILE OVERLAY --- */}
+      {/* --- MOBILE OVERLAY (Dark background when sidebar is open) --- */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden transition-opacity"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] lg:hidden transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -30,11 +35,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       {/* --- SIDEBAR CONTAINER --- */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-[70] w-72 bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-[70] w-72 bg-white border-r border-gray-100 flex flex-col 
+        transition-transform duration-300 ease-in-out transform
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
         lg:translate-x-0 lg:static lg:h-screen
       `}>
-        {/* Brand Logo - Zorvyn Branding */}
+        {/* Brand Logo */}
         <div className="p-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
@@ -45,18 +51,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </h1>
           </div>
 
-          {/* Close button for mobile */}
+          {/* Close button - Only visible on Mobile */}
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden p-2 text-gray-400 hover:bg-gray-100 rounded-full">
-            <X size={20} />
+            className="lg:hidden p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+            <X size={24} />
           </button>
         </div>
 
-        {/* User Profile Mini-Card (Thoughtful Touch) */}
+        {/* User Profile Card */}
         <div className="px-6 mb-8">
           <div className="bg-gray-50 p-4 rounded-[24px] border border-gray-100 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600 shrink-0">
               NC
             </div>
             <div className="overflow-hidden">
@@ -71,32 +77,41 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 space-y-1.5">
+        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => (
-            <button
+            <NavLink
               key={item.name}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
-                item.active
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-indigo-600"
-              }`}>
-              <span
-                className={
-                  item.active
-                    ? "text-white"
-                    : "text-gray-400 group-hover:text-indigo-600"
-                }>
-                {item.icon}
-              </span>
-              <span className="font-bold text-sm tracking-tight">
-                {item.name}
-              </span>
-            </button>
+              to={item.path}
+              onClick={() => setIsOpen(false)} // Mobile par click karte hi close ho jaye
+              className={({ isActive }) => `
+                w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group
+                ${
+                  isActive
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-indigo-600"
+                }
+              `}>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={
+                      isActive
+                        ? "text-white"
+                        : "text-gray-400 group-hover:text-indigo-600"
+                    }>
+                    {item.icon}
+                  </span>
+                  <span className="font-bold text-sm tracking-tight">
+                    {item.name}
+                  </span>
+                </>
+              )}
+            </NavLink>
           ))}
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-6 mt-auto">
+        <div className="p-6 mt-auto border-t border-gray-50">
           <button className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-100 rounded-2xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all font-bold text-sm">
             <LogOut size={18} />
             <span>Sign Out</span>
