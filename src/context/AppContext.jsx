@@ -10,22 +10,35 @@ import { initialTransactions } from "../data/mockData";
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  // ================== THEME ==================
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("app_theme") || "light";
+  });
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+
+    localStorage.setItem("app_theme", theme);
+  }, [theme]);
+
+  // ================== DATA ==================
   const [transactions, setTransactions] = useState(() => {
     try {
       const saved = localStorage.getItem("app_transactions");
       return saved ? JSON.parse(saved) : initialTransactions;
-    } catch (e) {
-      console.error("Restore Failed:", e);
+    } catch {
       return initialTransactions;
     }
   });
 
   const [role, setRole] = useState(() => {
-    try {
-      return localStorage.getItem("app_role") || "admin";
-    } catch {
-      return "admin";
-    }
+    return localStorage.getItem("app_role") || "admin";
   });
 
   const [currentView, setCurrentView] = useState("Dashboard");
@@ -47,7 +60,7 @@ export const AppProvider = ({ children }) => {
     },
   ]);
 
-  // ✅ PERSIST DATA
+  // ================== PERSIST ==================
   useEffect(() => {
     localStorage.setItem("app_transactions", JSON.stringify(transactions));
   }, [transactions]);
@@ -56,25 +69,20 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem("app_role", role);
   }, [role]);
 
-  // 🔥 GLOBAL FILTER LOGIC (Ab ye logic yahan centrally chalega)
+  // ================== FILTER ==================
   const filteredTransactions = useMemo(() => {
     const now = new Date();
 
     return transactions.filter((t) => {
       const tDate = new Date(t.date);
-      const diffTime = now - tDate;
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      const diffDays = (now - tDate) / (1000 * 60 * 60 * 24);
 
-      // Filtering by Time Range
       let matchesTime = true;
       if (timeRange === "24H") matchesTime = diffDays <= 1 && diffDays >= 0;
-      else if (timeRange === "7D") matchesTime = diffDays <= 7 && diffDays >= 0;
-      else if (timeRange === "1M")
-        matchesTime = diffDays <= 30 && diffDays >= 0;
-      else if (timeRange === "1Y")
-        matchesTime = diffDays <= 365 && diffDays >= 0;
+      else if (timeRange === "7D") matchesTime = diffDays <= 7;
+      else if (timeRange === "1M") matchesTime = diffDays <= 30;
+      else if (timeRange === "1Y") matchesTime = diffDays <= 365;
 
-      // Filtering by Search Term
       const matchesSearch = t.category
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -83,11 +91,10 @@ export const AppProvider = ({ children }) => {
     });
   }, [transactions, timeRange, searchTerm]);
 
-  // 🔥 ACTIONS
+  // ================== ACTIONS ==================
   const addTransaction = useCallback((newTx) => {
     const tx = { ...newTx, id: `tx-${Date.now()}` };
     setTransactions((prev) => [tx, ...prev]);
-    // Notification logic...
   }, []);
 
   const updateTransaction = useCallback((updatedTx) => {
@@ -104,16 +111,16 @@ export const AppProvider = ({ children }) => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   }, []);
 
-  const handleSetRole = useCallback((newRole) => {
-    setRole(newRole);
-  }, []);
-
-  // ✅ OPTIMIZED CONTEXT VALUE
+  // ================== CONTEXT VALUE ==================
   const value = useMemo(
     () => ({
-      // Data
-      transactions: filteredTransactions, // 👈 Ab components ko filtered data hi milega
-      allTransactions: transactions, // 👈 Backup ke liye agar kabhi saara data chahiye ho
+      // THEME
+      theme,
+      toggleTheme,
+
+      // DATA
+      transactions: filteredTransactions,
+      allTransactions: transactions,
       role,
       currentView,
       timeRange,
@@ -124,8 +131,8 @@ export const AppProvider = ({ children }) => {
       notifications,
       isSidebarOpen,
 
-      // Setters
-      setRole: handleSetRole,
+      // SETTERS
+      setRole,
       setCurrentView,
       setTimeRange,
       setSearchTerm,
@@ -135,13 +142,15 @@ export const AppProvider = ({ children }) => {
       setNotifications,
       setIsSidebarOpen,
 
-      // Actions
+      // ACTIONS
       addTransaction,
       updateTransaction,
       deleteTransaction,
       clearNotifications,
     }),
     [
+      theme,
+      toggleTheme,
       filteredTransactions,
       transactions,
       role,
@@ -157,7 +166,6 @@ export const AppProvider = ({ children }) => {
       updateTransaction,
       deleteTransaction,
       clearNotifications,
-      handleSetRole,
     ],
   );
 
