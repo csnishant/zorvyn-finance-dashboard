@@ -60,7 +60,7 @@ export default function Dashboard() {
             <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
               Zorvyn
               <br className="hidden sm:block" />
-              <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-violet-500 to-fuchsia-500 ml-0 sm:ml-[-5px]">
+              <span className="pb-5 relative inline-block text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-violet-500 to-fuchsia-500 ml-0 sm:ml-[-5px]">
                 Intelligence
               </span>
             </h1>
@@ -105,20 +105,32 @@ export default function Dashboard() {
         {/* 4. VISUALIZATION GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 relative z-[50]">
           <motion.div
-            className={`${chartCardClass} lg:col-span-7 xl:col-span-8 min-h-[450px] sm:min-h-[550px] relative z-[30] overflow-visible`}>
-            <div className="flex justify-between items-center mb-4 sm:mb-8">
-              <div className="space-y-1">
-                <h3 className="font-black text-slate-900 dark:text-white flex items-center gap-2 italic uppercase text-[9px] sm:text-[10px] tracking-widest">
-                  <Activity size={14} className="text-indigo-500" /> Cashflow
-                  Analytics
+            className={`${chartCardClass} lg:col-span-7 xl:col-span-8 min-h-[450px] sm:min-h-[550px] relative z-[30] overflow-visible p-6 sm:p-8`}>
+            {/* Header Section: Icon and Title */}
+            <div className="flex items-center gap-3 mb-8 ml-2">
+              <div className="p-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                <Zap size={18} className="text-indigo-500" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 italic">
+                  Cashflow{" "}
+                  <span className="text-slate-900 dark:text-white">
+                    Analytics
+                  </span>
                 </h3>
+                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
+                  Real-time Balance Overview
+                </span>
               </div>
             </div>
 
-            {/* Yahan height fix rakhein aur padding bottom badha dein */}
-            <div className="pb-[60px] flex-grow w-full relative h-[400px] sm:h-[450px] overflow-visible">
+            {/* Chart Container: Height aur Padding handle karne ke liye */}
+            <div className="w-full h-[350px] sm:h-[400px] mt-4 relative overflow-visible">
               <BalanceChart transactions={transactions} />
             </div>
+
+            {/* Optional: Padding Bottom bottom space maintain karne ke liye */}
+            <div className="pb-10" />
           </motion.div>
 
           {/* 2. Allocation Split Container: Ismein z-[10] ya z-0 rakhein */}
@@ -140,11 +152,7 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="w-full relative z-[10] -mx-1 sm:mx-0">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-[1px] rounded-[2rem] sm:rounded-[3rem]">
-                <div className="bg-[#F9F9F7] dark:bg-slate-950 rounded-[1.95rem] sm:rounded-[2.95rem] overflow-hidden">
-                  <AddTransactionForm />
-                </div>
-              </div>
+              <AddTransactionForm />
             </motion.div>
           )}
         </AnimatePresence>
@@ -152,8 +160,11 @@ export default function Dashboard() {
         {/* 6. INSIGHTS & TRANSACTIONS */}
         <div className="space-y-6 sm:space-y-8 relative z-[5]">
           <Insights transactions={transactions} />
-          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2rem] sm:rounded-[3rem] border border-slate-200/60 dark:border-slate-800 p-0 sm:p-8 shadow-2xl overflow-hidden">
-            <div className="px-5 py-5 sm:px-4 sm:py-4 mb-2 sm:mb-6 flex items-center justify-between border-b border-slate-100 sm:border-none">
+
+          {/* Card Container: p-0 rakha hai taaki table edges tak touch ho sake */}
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2rem] sm:rounded-[3rem] border border-slate-200/60 dark:border-slate-800 p-0 shadow-2xl overflow-hidden">
+            {/* Header: Sirf isme padding di hai taaki title align rahe */}
+            <div className="px-6 py-5 sm:px-8 sm:py-8 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="p-1.5 bg-slate-900 dark:bg-white rounded-lg">
                   <LayoutDashboard
@@ -166,8 +177,9 @@ export default function Dashboard() {
                 </h3>
               </div>
             </div>
-            {/* Table wrapper for mobile padding fix */}
-            <div className="w-full">
+
+            {/* Table Wrapper: overflow-x-auto mobile par scroll allow karega, aur w-full edges touch karega */}
+            <div className="w-full overflow-x-auto custom-scrollbar">
               <TransactionTable />
             </div>
           </div>
