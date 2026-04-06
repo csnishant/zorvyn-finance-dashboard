@@ -1,7 +1,14 @@
 import { useMemo } from "react";
 import { useFinance } from "../hooks/useFinance";
-import { motion } from "framer-motion";
-import { Activity, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Activity,
+  Calendar,
+  Zap,
+  LayoutDashboard,
+  Sparkles,
+  Layers,
+} from "lucide-react";
 
 // Components
 import SummaryCards from "../components/dashboard/SummaryCards";
@@ -11,135 +18,225 @@ import BalanceChart from "../components/visualizations/BalanceChart";
 import CategoryChart from "../components/visualizations/CategoryChart";
 import AddTransactionForm from "../components/admin/AddTransactionForm";
 
-// Premium Minimalist Flower SVG Component
-const FloralDecorative = ({ className }) => (
-  <svg
-    viewBox="0 0 100 100"
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="0.5"
-    strokeLinecap="round"
-    strokeLinejoin="round">
-    {/* Minimalist Rose Outline */}
-    <path d="M50 90C50 90 50 60 50 40C50 30 60 20 70 25C80 30 75 45 60 50C45 55 35 45 40 30C45 15 65 10 80 20M50 40C50 40 40 30 30 35C20 40 25 55 40 60C55 65 65 55 60 40C55 25 35 20 20 30" />
-    <path d="M50 90C50 90 30 80 20 70C10 60 15 50 30 55M50 90C50 90 70 80 80 70C90 60 85 50 70 55" />
-    <circle cx="50" cy="90" r="1" fill="currentColor" stroke="none" />
-  </svg>
-);
-
 export default function Dashboard() {
   const { transactions, role, timeRange, setTimeRange } = useFinance();
 
-  // Data Calculations
   const totals = useMemo(() => {
-    const income = transactions
-      .filter((t) => t.type?.toLowerCase() === "income")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    const expense = transactions
-      .filter((t) => t.type?.toLowerCase() === "expense")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    return { income, expense, balance: income - expense };
+    return transactions.reduce(
+      (acc, t) => {
+        const amt = Number(t.amount) || 0;
+        const type = t.type?.toLowerCase();
+        if (type === "income") acc.income += amt;
+        else if (type === "expense") acc.expense += amt;
+        acc.balance = acc.income - acc.expense;
+        return acc;
+      },
+      { income: 0, expense: 0, balance: 0 },
+    );
   }, [transactions]);
 
+  const chartCardClass =
+    "bg-white/70 dark:bg-slate-900/40 backdrop-blur-3xl p-6 lg:p-8 rounded-[3rem] border border-slate-200/60 dark:border-slate-800 shadow-2xl shadow-indigo-500/5 transition-all duration-500 hover:shadow-indigo-500/10 overflow-hidden flex flex-col group";
+
   return (
-    // 🎨 Theme: Changed background to cream-light and added a subtle gradient
-    <div className="flex flex-col gap-10 w-full max-w-screen-2xl mx-auto pb-24 px-6 bg-[#FFFDF5] relative min-h-screen overflow-hidden">
-      {/* Soft gradient overlay for depth */}
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-50/20 via-transparent to-rose-50/10 pointer-events-none z-0" />
+    // Background handling: Cream in Light, Slate-950 in Dark
+    <div className="min-h-screen w-full transition-colors duration-700 bg-[#F9F9F7] dark:bg-slate-950 relative overflow-hidden">
+      {/* --- PROFESSIONAL BACKGROUND STICKER / DECOR --- */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        {/* Top Right Glow */}
+        <div className="absolute -top-[10%] -right-[10%] w-[60%] h-[60%] bg-indigo-500/10 dark:bg-indigo-500/5 blur-[120px] rounded-full animate-pulse" />
 
-      {/* 1. Header (Updated backdrop to match cream theme) */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-8 py-10 border-b border-gray-100 relative z-10">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-600/10 text-indigo-600 border border-indigo-600/20 rounded-lg">
-              <Activity size={16} strokeWidth={3} />
+        {/* Bottom Left Glow */}
+        <div className="absolute -bottom-[10%] -left-[10%] w-[50%] h-[50%] bg-violet-500/10 dark:bg-violet-500/5 blur-[120px] rounded-full" />
+
+        {/* Abstract "Flux" Sticker Pattern */}
+        <div className="absolute top-1/4 right-5 opacity-[0.03] dark:opacity-[0.07] rotate-12 scale-150">
+          <Layers
+            size={400}
+            strokeWidth={0.5}
+            className="text-slate-900 dark:text-white"
+          />
+        </div>
+        <div className="absolute bottom-1/4 -left-20 opacity-[0.02] dark:opacity-[0.05] -rotate-12 scale-125">
+          <Activity
+            size={500}
+            strokeWidth={0.5}
+            className="text-indigo-900 dark:text-indigo-100"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-8 w-full max-w-screen-2xl mx-auto pb-24 px-4 sm:px-10 relative z-10">
+        {/* 1. BRANDED HEADER */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-12 pb-6 relative">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  staggerChildren: 0.1, // Har element thoda gap se ayega, smooth lagega
+                  delayChildren: 0.2,
+                },
+              },
+            }}
+            className="space-y-1">
+            {/* Sub-Header Branding */}
+            <motion.div
+              variants={{
+                hidden: { x: -20, opacity: 0 },
+                visible: { x: 0, opacity: 1 },
+              }}
+              className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-3">
+              <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-xl backdrop-blur-md border border-indigo-500/10">
+                <Zap size={16} fill="currentColor" className="animate-pulse" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] italic opacity-80">
+                Dashboard
+              </span>
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h1
+              variants={{
+                hidden: { opacity: 0, scale: 0.95 },
+                visible: { opacity: 1, scale: 1 },
+              }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+              className="text-6xl sm:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85]">
+              Zorvyn
+              <br />
+              <span className=" p-3 relative inline-block text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-violet-500 to-fuchsia-500">
+                Intelligence
+                {/* Subtle underline glow */}
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 0.8, duration: 1 }}
+                  className="absolute -bottom-2 left-0 h-[4px] bg-gradient-to-r from-indigo-600/40 to-transparent rounded-full"
+                />
+              </span>
+            </motion.h1>
+          </motion.div>
+
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="flex items-center gap-3">
+            <div className="group flex items-center gap-3 px-6 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:border-indigo-500/30">
+              <Calendar
+                size={18}
+                className="text-indigo-500 group-hover:rotate-12 transition-transform"
+              />
+              <span className="font-black text-slate-700 dark:text-slate-300 text-xs uppercase tracking-widest tabular-nums">
+                {new Date().toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
             </div>
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.6em] italic">
-              Registry v8.01 {role === "viewer" && "• READ-ONLY"}
-            </span>
-          </div>
-          <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Registry <span className="text-indigo-600">Flux</span>
-          </h1>
-        </div>
+          </motion.div>
+        </header>
 
-        <div className="flex items-center gap-6 px-8 py-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm cursor-default">
-          <Calendar size={20} className="text-indigo-600" />
-          <div className="flex flex-col leading-none items-start gap-1.5 translate-y-0.5">
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">
-              Index Date
-            </span>
-            <span className="text-lg font-black text-slate-900 tracking-widest uppercase italic tabular-nums leading-none">
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
+        {/* 2. TIME RANGE FILTERS */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex gap-1.5 p-1.5 bg-slate-200/40 dark:bg-slate-800/40 backdrop-blur-md w-fit rounded-2xl border border-slate-200 dark:border-slate-700">
+            {["24H", "7D", "1M", "1Y", "ALL"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setTimeRange(t)}
+                className={`px-6 py-2 rounded-xl text-[10px] font-black tracking-[0.1em] transition-all duration-300 ${
+                  timeRange === t
+                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xl scale-105"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                }`}>
+                {t}
+              </button>
+            ))}
           </div>
         </div>
-      </header>
 
-      {/* Content wrapper to ensure z-index priority over background decorations */}
-      <div className="relative z-10 flex flex-col gap-10">
-        {/* 2. Filters */}
-        <div className="flex gap-2 p-1 bg-slate-200/50 w-fit rounded-lg">
-          {["24H", "7D", "1M", "1Y", "ALL"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTimeRange(t)}
-              className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
-                timeRange === t
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}>
-              {t}
-            </button>
-          ))}
-        </div>
-
+        {/* 3. CORE SUMMARY */}
         <SummaryCards totals={totals} />
 
-        {/* 3. Charts (Added subtle shadow boost to stand out on cream) */}
+        {/* 4. VISUALIZATION GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-white/80 backdrop-blur-sm p-8 sm:p-10 h-[600px] rounded-3xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden">
-            <BalanceChart transactions={transactions} />
-          </div>
-          <div className="lg:col-span-4 bg-white/80 backdrop-blur-sm p-8 h-full min-h-[600px] rounded-3xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden">
-            <CategoryChart transactions={transactions} />
-          </div>
+          <motion.div
+            whileHover={{ y: -5 }}
+            className={`${chartCardClass} lg:col-span-7 xl:col-span-8 min-h-[500px]`}>
+            <div className="flex justify-between items-center mb-8">
+              <div className="space-y-1">
+                <h3 className="font-black text-slate-900 dark:text-white flex items-center gap-2 italic uppercase text-[10px] tracking-[0.3em]">
+                  <Activity size={16} className="text-indigo-500" /> Cashflow
+                  Analytics
+                </h3>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                  Real-time vector tracking
+                </p>
+              </div>
+            </div>
+            <div className="flex-grow w-full">
+              <BalanceChart transactions={transactions} />
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ y: -5 }}
+            className={`${chartCardClass} lg:col-span-5 xl:col-span-4 min-h-[500px]`}>
+            <h3 className="font-black text-slate-900 dark:text-white mb-8 italic uppercase text-[10px] tracking-[0.3em]">
+              Allocation Split
+            </h3>
+            <div className="flex-grow w-full overflow-hidden flex items-center justify-center">
+              <CategoryChart transactions={transactions} />
+            </div>
+          </motion.div>
         </div>
 
-        {/* 🛡️ 4. Form (Hide if not Admin) */}
-        {role === "admin" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative z-20">
-            <AddTransactionForm />
-          </motion.div>
-        )}
+        {/* 5. ADMIN SECTION */}
+        <AnimatePresence>
+          {role === "admin" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full">
+              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-[1px] rounded-[3rem] shadow-2xl shadow-indigo-500/20">
+                <div className="bg-[#F9F9F7] dark:bg-slate-950 rounded-[2.95rem] overflow-hidden">
+                  <AddTransactionForm />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* 5. Data View */}
-        <div className="flex flex-col gap-8">
+        {/* 6. INSIGHTS & TRANSACTIONS */}
+        <div className="space-y-8">
           <Insights transactions={transactions} />
-          <div className="w-full overflow-hidden bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100 p-6 shadow-sm">
+
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-200/60 dark:border-slate-800 p-2 sm:p-8 shadow-2xl shadow-slate-900/5">
+            <div className="px-4 py-4 mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-900 dark:bg-white rounded-xl">
+                  <LayoutDashboard
+                    size={18}
+                    className="text-white dark:text-slate-900"
+                  />
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white italic uppercase text-xs tracking-[0.2em]">
+                  Master Ledger
+                </h3>
+              </div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Protocol 4.0.2
+              </span>
+            </div>
             <TransactionTable />
           </div>
         </div>
-      </div>
-
-      {/* 🌸 6. Floral Decoration (Bottom Right, Replacing CPU) */}
-      <div className="fixed bottom-0 right-0 p-10 opacity-[0.06] pointer-events-none group-hover:opacity-10 transition-opacity duration-1000 z-0">
-        <FloralDecorative className="w-[500px] h-[500px] text-indigo-900 rotate-12" />
-      </div>
-
-      {/* Secondary decoration for balance */}
-      <div className="fixed -top-10 -left-10 p-10 opacity-[0.03] pointer-events-none z-0">
-        <FloralDecorative className="w-[300px] h-[300px] text-rose-900 -rotate-12" />
       </div>
     </div>
   );
