@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -8,223 +8,217 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Activity, Zap, Calendar, Tag, Inbox } from "lucide-react";
+import { motion } from "framer-motion";
+import { Zap, TrendingUp } from "lucide-react";
 
-// 1. Optimized Tooltip: Categorical only, No Redundancy
-const CustomTooltip = ({ active, payload }) => {
+/* ================= TOOLTIP ================= */
+
+const CustomTooltip = ({ active, payload, coordinate }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const hasTransactions = data.details && data.details.length > 0;
+    const isRightSide = coordinate?.x > window.innerWidth / 2;
+
+    const desktopStyles = {
+      left: isRightSide ? coordinate.x - 300 : coordinate.x + 30,
+      top: coordinate.y - 100,
+      position: "fixed",
+      width: "280px",
+    };
+
+    const mobileStyles = {
+      left: "50%",
+      transform: "translateX(-50%)",
+      top: "env(safe-area-inset-top, 12px)",
+      width: "92%",
+      position: "fixed",
+      maxWidth: "420px",
+    };
 
     return (
-      <div className="glass bg-slate-950/95 border border-white/10 p-4 rounded-2xl shadow-2xl backdrop-blur-xl pointer-events-none select-none min-w-[220px] z-[9999]">
-        {/* Header: Date Only */}
-        <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-2">
-          <Calendar size={12} className="text-indigo-400" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            {data.fullDate}
-          </span>
-        </div>
-
-        {/* Current Balance */}
-        <div className="flex flex-col mb-4">
-          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">
-            Total Equity
-          </span>
-          <span className="text-2xl font-black text-white tracking-tighter tabular-nums">
-            ₹{payload[0].value.toLocaleString()}
-          </span>
-        </div>
-
-        {/* Category List or No Data Message */}
-        <div className="space-y-2">
-          <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-1">
-            Activity Details
-          </span>
-
-          {hasTransactions ? (
-            data.details.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
-                <div className="flex items-center gap-2">
-                  <Tag size={10} className="text-slate-500" />
-                  <span className="text-[10px] font-bold text-slate-300 capitalize">
-                    {item.category || "Other"}
-                  </span>
-                </div>
-                <span
-                  className={`text-[10px] font-black ${item.type === "income" ? "text-emerald-400" : "text-rose-400"}`}>
-                  {item.type === "income" ? "+" : "-"}₹
-                  {item.amount.toLocaleString()}
-                </span>
-              </div>
-            ))
-          ) : (
-            <div className="flex flex-col items-center py-2 opacity-40">
-              <Inbox size={16} className="text-slate-400 mb-1" />
-              <p className="text-[9px] font-bold text-slate-400 uppercase">
-                No Transactions
+      <div
+        className="z-[9999] pointer-events-none transition-all duration-300"
+        style={isMobile ? mobileStyles : desktopStyles}>
+        <motion.div
+          initial={{ opacity: 0, y: isMobile ? -10 : 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass p-4 rounded-[20px] border border-white/10 shadow-2xl backdrop-blur-2xl bg-slate-900/90 flex flex-col gap-2">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/5 pb-2">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black uppercase text-indigo-400 tracking-widest italic">
+                Snapshot
+              </span>
+              <p className="text-[10px] font-bold text-white">
+                {data.fullDate}
               </p>
             </div>
-          )}
-        </div>
+            <TrendingUp size={14} className="text-indigo-500 animate-pulse" />
+          </div>
+
+          {/* Value */}
+          <div className="flex justify-between items-end">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold text-slate-500 uppercase">
+                Net Capital
+              </span>
+              <span className="text-xl font-black text-white tabular-nums italic">
+                ₹{payload[0].value.toLocaleString("en-IN")}
+              </span>
+            </div>
+            <span className="text-[8px] font-black text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+              {data.details.length} Events
+            </span>
+          </div>
+
+          {/* Activity Section */}
+          <div className="space-y-1 max-h-[100px] overflow-y-auto pr-1 custom-scrollbar">
+            {hasTransactions &&
+              data.details.map((item, idx) => {
+                const isIncome = item.type?.toLowerCase() === "income";
+                return (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-white/[0.03] p-2 rounded-lg border border-white/[0.05]">
+                    {/* Category (Left side) */}
+                    <span className="text-[10px] font-bold text-slate-300 truncate max-w-[120px]">
+                      {item.category}
+                    </span>
+
+                    {/* Amount (Right side) */}
+                    <span
+                      className={`text-[10px] font-black ${
+                        isIncome ? "text-emerald-400" : "text-rose-400"
+                      }`}>
+                      {isIncome ? "+" : "-"}₹
+                      {item.amount.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+        </motion.div>
       </div>
     );
   }
   return null;
 };
 
-const BalanceChart = ({ transactions }) => {
+/* ================= MAIN CHART ================= */
+
+export default function BalanceChart({ transactions }) {
   const chartData = useMemo(() => {
     if (!transactions?.length) return [];
+    const sorted = [...transactions].sort(
+      (a, b) => new Date(a.date) - new Date(b.date),
+    );
 
-    // 1. Sort by actual Date
-    const sorted = [...transactions]
-      .filter((t) => t.date && !isNaN(new Date(t.date).getTime()))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const groupedData = [];
     let runningBalance = 0;
-
-    // 2. Group by Date Key
-    const dayGroups = sorted.reduce((acc, t) => {
-      const dateKey = new Date(t.date).toLocaleDateString("en-IN");
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(t);
+    const grouped = sorted.reduce((acc, t) => {
+      const dateKey = new Date(t.date).toISOString().split("T")[0];
+      if (!acc[dateKey])
+        acc[dateKey] = { rawDate: new Date(t.date), items: [] };
+      acc[dateKey].items.push(t);
       return acc;
     }, {});
 
-    const sortedDateKeys = Object.keys(dayGroups).sort((a, b) => {
-      const [dA, mA, yA] = a.split("/");
-      const [dB, mB, yB] = b.split("/");
-      return new Date(yA, mA - 1, dA) - new Date(yB, mB - 1, dB);
-    });
+    return Object.keys(grouped)
+      .sort()
+      .map((key) => {
+        const { rawDate, items } = grouped[key];
+        const dailyNet = items.reduce(
+          (sum, t) =>
+            sum +
+            (t.type?.toLowerCase() === "income"
+              ? parseFloat(t.amount)
+              : -parseFloat(t.amount)),
+          0,
+        );
+        runningBalance += dailyNet;
 
-    sortedDateKeys.forEach((dateKey) => {
-      const dayTransactions = dayGroups[dateKey];
-      let dailyNetChange = 0;
-
-      dayTransactions.forEach((t) => {
-        const amt = parseFloat(t.amount) || 0;
-        dailyNetChange += t.type?.toLowerCase() === "income" ? amt : -amt;
+        return {
+          displayDate: rawDate.toLocaleDateString("en-IN", {
+            month: "short",
+            day: "numeric",
+          }),
+          fullDate: rawDate.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          balance: runningBalance,
+          details: items,
+        };
       });
-
-      runningBalance += dailyNetChange;
-
-      groupedData.push({
-        displayDate: new Date(dayTransactions[0].date).toLocaleDateString(
-          "en-IN",
-          { month: "short", day: "numeric" },
-        ),
-        fullDate: new Date(dayTransactions[0].date).toLocaleDateString(
-          "en-IN",
-          { day: "numeric", month: "long", year: "numeric" },
-        ),
-        balance: runningBalance,
-        details: dayTransactions, // Only relevant day's details
-      });
-    });
-
-    return groupedData;
   }, [transactions]);
 
-  if (!chartData.length)
-    return (
-      <div className="h-full flex flex-col items-center justify-center opacity-20 gap-4">
-        <Zap size={40} className="animate-pulse text-indigo-500" />
-        <p className="text-[10px] font-black text-white uppercase tracking-[0.5em]">
-          No Activity
-        </p>
-      </div>
-    );
-
   return (
-    <div className="w-full h-full flex flex-col gap-8 select-none relative">
-      {/* HEADER SECTION */}
-      <div className="flex justify-between items-end px-2">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
-              Live Analytics
-            </span>
-          </div>
-          <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
-            Net <span className="text-indigo-500">Worth</span>
-          </h2>
+    <div className="w-full h-full min-h-[450px] relative bg-slate-950/50 rounded-[32px] p-4 sm:p-8 overflow-visible pt-16">
+      <div className="flex items-center gap-3 mb-6 sm:mb-8 ml-2">
+        <div className="p-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+          <Zap size={18} className="text-indigo-500" />
         </div>
-        <div className="flex flex-col items-end text-right">
-          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-1">
-            Peak
-          </span>
-          <span className="text-xl font-black text-white tracking-tighter tabular-nums">
-            ₹{Math.max(...chartData.map((d) => d.balance)).toLocaleString()}
-          </span>
-        </div>
+        <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 italic">
+          Cashflow <span className="text-white">Analytics</span>
+        </h3>
       </div>
 
-      {/* CHART CANVAS */}
-      <div className="flex-grow min-h-[340px] w-full relative pt-6 border-t border-white/[0.03]">
+      <div className="w-full h-[280px] sm:h-[300px] mt-12 sm:mt-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
             margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
             <defs>
-              <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
               </linearGradient>
             </defs>
-
-            <CartesianGrid
-              strokeDasharray="0"
-              vertical={false}
-              stroke="rgba(255,255,255,0.03)"
-            />
-
+            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
             <XAxis
               dataKey="displayDate"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#475569", fontSize: 9, fontWeight: 800 }}
-              dy={15}
+              tick={{ fill: "#475569", fontSize: 10, fontWeight: 800 }}
+              dy={10}
             />
-
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#475569", fontSize: 9, fontWeight: 800 }}
-              domain={["auto", "auto"]}
-              tickFormatter={(v) =>
-                `₹${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`
-              }
+              tick={{ fill: "#475569", fontSize: 10, fontWeight: 800 }}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
             />
-
             <Tooltip
               content={<CustomTooltip />}
+              wrapperStyle={{ zIndex: 1000 }}
               cursor={{
                 stroke: "#6366f1",
                 strokeWidth: 2,
                 strokeDasharray: "4 4",
               }}
-              allowEscapeViewBox={{ x: true, y: true }}
-              wrapperStyle={{ zIndex: 10000 }}
+              isAnimationActive={false}
+              useTranslate3d={false}
             />
-
             <Area
               type="monotone"
               dataKey="balance"
               stroke="#6366f1"
               strokeWidth={4}
-              fill="url(#balanceGradient)"
-              animationDuration={1500}
+              fill="url(#chartGradient)"
               activeDot={{
                 r: 6,
                 fill: "#fff",
                 stroke: "#6366f1",
                 strokeWidth: 3,
-                className: "drop-shadow-[0_0_10px_rgba(99,102,241,0.8)]",
               }}
             />
           </AreaChart>
@@ -232,6 +226,4 @@ const BalanceChart = ({ transactions }) => {
       </div>
     </div>
   );
-};
-
-export default BalanceChart;
+}
