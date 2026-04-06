@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@layer base {
+
+    /* Default light mode styles */
+    :root {
+        --background: #ffffff;
+        --foreground: #0f172a;
+    }
+
+    /* Dark mode styles jab class="dark" ho */
+    .dark {
+        --background: #020617;
+        --foreground: #ffffff;
+    }
+}
+
+/* Smooth transition for all elements */
+* {
+    @apply transition-colors duration-300;
+    
+}
+@custom-variant dark (&:where(.dark, .dark *));

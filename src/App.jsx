@@ -1,54 +1,56 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom"; // 1. useLocation add kiya
+import { motion, AnimatePresence } from "framer-motion"; // 2. Framer motion add kiya
 import Sidebar from "./components/Layout/Sidebar";
 import Navbar from "./components/Layout/Navbar";
 import Dashboard from "./pages/Dashboard";
 import TransactionTable from "./components/transactions/TransactionTable";
-import Insights from "./components/dashboard/Insights";
 import { useFinance } from "./hooks/useFinance";
-
-const Settings = () => (
-  <div className="p-10 text-2xl font-bold text-gray-800">Settings Page</div>
-);
+import Insights from "./components/dashboard/Insights";
 
 function App() {
-  const { isSidebarOpen } = useFinance();
+  const { isSidebarOpen, theme } = useFinance();
+  const location = useLocation(); // 3. Current URL track karne ke liye
 
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
-      {/* SIDEBAR - Isse koi props dene ki zaroorat nahi kyunki ye khud hook use kar raha hai */}
+    <div
+      className={`flex min-h-screen transition-colors duration-500 ${
+        theme === "dark" ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+      }`}>
       <Sidebar />
 
-      {/* MAIN CONTENT AREA */}
       <div
         className={`flex flex-col flex-1 w-full transition-all duration-300 ease-in-out 
-          ${isSidebarOpen ? "lg:pl-72" : "lg:pl-0"}`} // <-- Dynamic Padding
-      >
-        <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
+          ${isSidebarOpen ? "lg:pl-72" : "lg:pl-0"}`}>
+        <header className="sticky top-0 z-40 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800">
           <Navbar />
         </header>
 
         <main className="flex-1 w-full overflow-x-hidden">
-          <div className="max-w-[1400px] mx-auto p-4 lg:p-8">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route
-                path="/transactions"
-                element={
-                  <div className="glass p-6 rounded-3xl">
-                    <TransactionTable />
-                  </div>
-                }
-              />
-              <Route path="/insights" element={<Insights />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route
-                path="*"
-                element={
-                  <div className="p-10 text-center">404 - Page Not Found</div>
-                }
-              />
-            </Routes>
+          <div className="max-w-[1400px] mx-auto p-4 lg:p-8 min-h-screen bg-transparent">
+            {/* 4. Global Animation Wrapper Start */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname} // Sabse Important: Key path par depend hai
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}>
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route
+                    path="/transactions"
+                    element={
+                      <div className="glass dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-800">
+                        <TransactionTable />
+                      </div>
+                    }
+                  />
+                  <Route path="/insights" element={<Insights />} />
+                </Routes>
+              </motion.div>
+            </AnimatePresence>
+            {/* Global Animation Wrapper End */}
           </div>
         </main>
       </div>
