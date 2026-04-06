@@ -5,32 +5,35 @@ import {
   Search,
   ArrowUpDown,
   Calendar,
-  Filter,
   ArrowUpRight,
   ArrowDownLeft,
   Inbox,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const TransactionTable = () => {
   const { transactions, role, deleteTransaction, searchTerm, setSearchTerm } =
     useFinance();
 
-  // Local states for UI control
   const [sortConfig, setSortConfig] = useState({
     key: "date",
     direction: "desc",
   });
-  const [filterType, setFilterType] = useState("all"); // 'all', 'income', 'expense'
+  const [filterType, setFilterType] = useState("all");
 
-  // --- CORE LOGIC: FILTERING & SORTING ---
+  // --- CORE LOGIC ---
   const processedData = useMemo(() => {
-    // 1. Filter by Type
     let data = transactions.filter((t) => {
-      if (filterType === "all") return true;
-      return t.type?.toLowerCase() === filterType;
+      const matchesFilter =
+        filterType === "all" || t.type?.toLowerCase() === filterType;
+      const matchesSearch = t.category
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      return matchesFilter && matchesSearch;
     });
 
-    // 2. Sort Logic
     if (sortConfig.key) {
       data.sort((a, b) => {
         let valA = a[sortConfig.key];
@@ -51,7 +54,7 @@ const TransactionTable = () => {
       });
     }
     return data;
-  }, [transactions, sortConfig, filterType]);
+  }, [transactions, sortConfig, filterType, searchTerm]);
 
   const requestSort = (key) => {
     let direction = "asc";
@@ -62,170 +65,193 @@ const TransactionTable = () => {
   };
 
   return (
-    <div className="w-full bg-white/40 backdrop-blur-md rounded-[32px] overflow-hidden border border-gray-100 shadow-sm">
-      {/* --- TABLE HEADER & CONTROLS --- */}
-      <div className="p-8 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 border-b border-gray-50">
-        <div className="space-y-1">
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">
-            Live <span className="text-indigo-600">Registry</span>
-          </h3>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">
-            Protocol Alpha • {processedData.length} Entries Localized
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
-          {/* Quick Filter Toggles */}
-          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-            {["all", "income", "expense"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setFilterType(type)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  filterType === type
-                    ? "bg-white text-indigo-600 shadow-sm shadow-indigo-100"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}>
-                {type}
-              </button>
-            ))}
+    <div className="w-full bg-white/70 dark:bg-slate-900/50 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden border border-slate-200/60 dark:border-slate-800 shadow-2xl relative">
+      {/* 1. Header & Controls */}
+      <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-2xl border border-indigo-500/20">
+              <Zap size={20} fill="currentColor" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase">
+                Live <span className="text-indigo-500">Registry</span>
+              </h3>
+              <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.3em]">
+                {processedData.length} Nodes Synchronized
+              </p>
+            </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative flex-1 sm:min-w-[300px]">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="Search by category or keyword..."
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 focus:bg-white outline-none transition-all placeholder:text-slate-300"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            {/* Filter Pills */}
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+              {["all", "income", "expense"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    filterType === type
+                      ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-md"
+                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  }`}>
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative flex-1 min-w-[280px]">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search encrypted data..."
+                className="w-full pl-12 pr-4 py-3.5 bg-slate-100/50 dark:bg-slate-800/40 border border-transparent focus:border-indigo-500/50 dark:focus:border-indigo-500/30 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* --- DATA TABLE --- */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      {/* 2. Scrollable Table Container */}
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse min-w-[700px]">
           <thead>
-            <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+            <tr className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.25em] border-b border-slate-100 dark:border-slate-800">
               <th
-                className="px-8 py-6 cursor-pointer hover:bg-slate-50 transition-colors group"
+                className="px-8 py-6 cursor-pointer hover:text-indigo-500 transition-colors"
                 onClick={() => requestSort("date")}>
                 <div className="flex items-center gap-2">
-                  <Calendar
-                    size={14}
-                    className={
-                      sortConfig.key === "date" ? "text-indigo-600" : ""
-                    }
-                  />
-                  Date Index
+                  <Calendar size={13} /> Timestamp
                   <ArrowUpDown
                     size={12}
-                    className={`opacity-0 group-hover:opacity-100 ${sortConfig.key === "date" ? "opacity-100 text-indigo-600" : ""}`}
+                    className={
+                      sortConfig.key === "date"
+                        ? "text-indigo-500"
+                        : "opacity-30"
+                    }
                   />
                 </div>
               </th>
               <th
-                className="px-8 py-6 cursor-pointer hover:bg-slate-50 transition-colors group"
+                className="px-8 py-6 cursor-pointer hover:text-indigo-500 transition-colors"
                 onClick={() => requestSort("category")}>
                 <div className="flex items-center gap-2">
                   Category{" "}
                   <ArrowUpDown
                     size={12}
-                    className="opacity-0 group-hover:opacity-100"
+                    className={
+                      sortConfig.key === "category"
+                        ? "text-indigo-500"
+                        : "opacity-30"
+                    }
                   />
                 </div>
               </th>
-              <th className="px-8 py-6">Protocol Type</th>
+              <th className="px-8 py-6">Protocol</th>
               <th
-                className="px-8 py-6 text-right cursor-pointer hover:bg-slate-50 transition-colors group"
+                className="px-8 py-6 text-right cursor-pointer hover:text-indigo-500 transition-colors"
                 onClick={() => requestSort("amount")}>
                 <div className="flex items-center justify-end gap-2">
                   Yield{" "}
                   <ArrowUpDown
                     size={12}
-                    className="opacity-0 group-hover:opacity-100"
+                    className={
+                      sortConfig.key === "amount"
+                        ? "text-indigo-500"
+                        : "opacity-30"
+                    }
                   />
                 </div>
               </th>
               {role === "admin" && (
-                <th className="px-8 py-6 text-center">Termination</th>
+                <th className="px-8 py-6 text-center">
+                  <ShieldCheck size={14} className="mx-auto" />
+                </th>
               )}
             </tr>
           </thead>
 
-          <tbody className="text-slate-600 font-medium">
-            {processedData.length > 0 ? (
-              processedData.map((t) => (
-                <tr
-                  key={t.id}
-                  className="group border-b border-slate-50/50 hover:bg-indigo-50/30 transition-all duration-300">
-                  <td className="px-8 py-5 text-xs tabular-nums text-slate-400 font-bold italic">
-                    {new Date(t.date).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="px-8 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-black text-slate-900 uppercase tracking-tight">
-                        {t.category}
-                      </span>
-                     
-                    </div>
-                  </td>
-                  <td className="px-8 py-5">
-                    <div
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                        t.type === "income"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-rose-50 text-rose-600"
-                      }`}>
-                      {t.type === "income" ? (
-                        <ArrowUpRight size={10} />
-                      ) : (
-                        <ArrowDownLeft size={10} />
-                      )}
-                      {t.type}
-                    </div>
-                  </td>
-                  <td
-                    className={`px-8 py-5 text-right text-sm font-black tabular-nums ${
-                      t.type === "income" ? "text-emerald-600" : "text-rose-600"
-                    }`}>
-                    {t.type === "income" ? "+" : "-"}₹
-                    {t.amount.toLocaleString("en-IN")}
-                  </td>
-
-                  {role === "admin" && (
-                    <td className="px-8 py-5 text-center">
-                      <button
-                        onClick={() => deleteTransaction(t.id)}
-                        className="p-2.5 text-slate-200 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all active:scale-90">
-                        <Trash2 size={18} />
-                      </button>
+          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+            <AnimatePresence mode="popLayout">
+              {processedData.length > 0 ? (
+                processedData.map((t) => (
+                  <motion.tr
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    key={t.id}
+                    className="group hover:bg-indigo-50/30 dark:hover:bg-indigo-500/5 transition-all duration-300">
+                    <td className="px-8 py-5 text-[11px] tabular-nums text-slate-400 font-bold italic">
+                      {new Date(t.date).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </td>
-                  )}
+                    <td className="px-8 py-5 font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight text-sm">
+                      {t.category}
+                    </td>
+                    <td className="px-8 py-5">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                          t.type === "income"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                        }`}>
+                        {t.type === "income" ? (
+                          <ArrowUpRight size={10} />
+                        ) : (
+                          <ArrowDownLeft size={10} />
+                        )}
+                        {t.type}
+                      </span>
+                    </td>
+                    <td
+                      className={`px-8 py-5 text-right text-sm font-black tabular-nums ${
+                        t.type === "income"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-rose-600 dark:text-rose-400"
+                      }`}>
+                      {t.type === "income" ? "+" : "-"}₹
+                      {t.amount.toLocaleString("en-IN")}
+                    </td>
+                    {role === "admin" && (
+                      <td className="px-8 py-5 text-center">
+                        <button
+                          onClick={() => deleteTransaction(t.id)}
+                          className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all active:scale-90">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    )}
+                  </motion.tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={role === "admin" ? 5 : 4}
+                    className="py-32 text-center">
+                    <div className="flex flex-col items-center gap-4 opacity-20">
+                      <Inbox
+                        size={64}
+                        strokeWidth={1}
+                        className="text-slate-400"
+                      />
+                      <p className="text-xs font-black uppercase tracking-[0.6em] dark:text-white">
+                        Empty Registry
+                      </p>
+                    </div>
+                  </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="py-20 text-center">
-                  <div className="flex flex-col items-center gap-3 opacity-20">
-                    <Inbox size={48} strokeWidth={1} />
-                    <p className="text-xs font-black uppercase tracking-[0.5em]">
-                      No Matching Data Found
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
+              )}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>
