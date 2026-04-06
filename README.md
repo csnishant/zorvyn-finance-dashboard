@@ -142,8 +142,7 @@ http://localhost:5173
 ## 🙌 Author
 
 **Nishant Choudhary**
-📧 [cs.nishantchoudhary@gmail.com](mailto:cs.nishantchoudhary@gmail.com)
-📱 +91-XXXXXXXXXX
+📧 [cs.nishantchoudhary@gmail.com]
 
 ---
 
