@@ -1,16 +1,152 @@
-# React + Vite
+# 📊 Finance Dashboard UI - Internship Assignment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium, interactive finance management tool built to provide deep insights into personal equity and transaction history.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Project
 
-## React Compiler
+🔗 **Deployment Link:** 
+💻 **Source Code:** https://github.com/csnishant/zorvyn-finance-dashboard
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠 Core Mandatory Requirements (Implemented)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. 📈 Dashboard Overview & Visualizations
+
+* **Summary Cards:** Real-time calculation of Total Balance, Peak Equity, and Total Income/Expenses.
+* **Time-based Visualization:** Interactive Area Chart to track daily balance trends.
+* **Categorical Visualization:** Spending breakdown by category.
+
+---
+
+### 2. 💳 Transactions Management
+
+* **Detailed List:** Each transaction shows Date, Amount, Category, and Type (Income/Expense).
+* **Search & Filtering:** Filter transactions by category and search specific entries.
+* **Sorting:** Transactions automatically sorted by date.
+
+---
+
+### 3. 🔐 Role-Based UI (RBAC Simulation)
+
+* **Dual Roles:** Admin & Viewer modes.
+* **Dynamic UI:**
+
+  * **Admin:** Can Add & Delete transactions.
+  * **Viewer:** Read-only access.
+
+---
+
+### 4. 🧠 Insights Section
+
+* **Smart Analytics:** Detects Highest Spending Category & Peak Portfolio Value.
+* **Quick Observations:** Snapshot of financial health.
+
+---
+
+### 5. ⚙️ State Management & Tech Stack
+
+* **Vite + React:** Fast dev & optimized builds.
+* **Hooks Used:** `useState`, `useMemo`, `useEffect`
+* Efficient and optimized data flow.
+
+---
+
+## ✨ Optional Enhancements (Beyond Requirements)
+
+### ⚡ Framer Motion Animations
+
+Smooth transitions & micro-interactions across dashboard.
+
+### 💾 Local Storage Persistence
+
+* Data persists even after refresh.
+* Transactions & settings saved in browser.
+
+### 🌓 Premium Dark Mode
+
+* Glassmorphism UI
+* Clean & professional finance app feel
+
+### 📅 Smart Grouping
+
+* Transactions grouped by:
+
+  * Today
+  * Yesterday
+  * Specific Dates
+
+### 📱 Fully Responsive
+
+* Works seamlessly on:
+
+  * Mobile 📱
+  * Tablet 📟
+  * Desktop 💻
+
+### 🧪 Edge Case Handling
+
+* Custom "No Data" states
+* Clean fallback UI using Lucide icons
+
+---
+
+## 🖼️ UI Highlights
+
+* Advanced analytics dashboard
+* Smooth chart interactions
+* Smart tooltip positioning
+* Clean modern UI design
+
+---
+
+## 🚀 How to Run Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+👉 Open in browser:
+
+```
+http://localhost:5173
+```
+
+---
+
+## 📦 Tech Stack
+
+* ⚛️ React (Vite)
+* 📊 Recharts
+* 🎨 Tailwind CSS
+* 🎞️ Framer Motion
+* 🧩 Lucide Icons
+
+---
+
+## 📌 Key Highlights
+
+* 💡 Production-level UI/UX
+* ⚡ High performance rendering
+* 🧠 Smart analytics logic
+* 🔥 Custom tooltip system (no overflow issues)
+
+---
+
+## 🙌 Author
+
+**Nishant Choudhary**
+📧 [cs.nishantchoudhary@gmail.com](mailto:cs.nishantchoudhary@gmail.com)
+📱 +91-XXXXXXXXXX
+
+---
+
+## ⭐ If you like this project
+
+Give it a ⭐ on GitHub and share feedback!
