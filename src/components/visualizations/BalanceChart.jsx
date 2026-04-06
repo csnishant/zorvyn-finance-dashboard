@@ -162,7 +162,8 @@ export default function BalanceChart({ transactions }) {
   }, [transactions]);
 
   return (
-    <div className="w-full h-full min-h-[450px] relative bg-slate-950/50 rounded-[32px] p-4 sm:p-8 overflow-visible pt-16">
+    // Badlav: min-h ko badha kar [500px] kiya aur padding-bottom [50px]
+    <div className="w-full h-full min-h-[500px]  relative bg-slate-950/50 rounded-[32px] p-4 pb-[50px] sm:p-8 overflow-visible pt-16">
       <div className="flex items-center gap-3 mb-6 sm:mb-8 ml-2">
         <div className="p-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
           <Zap size={18} className="text-indigo-500" />
@@ -172,11 +173,12 @@ export default function BalanceChart({ transactions }) {
         </h3>
       </div>
 
-      <div className="w-full h-[280px] sm:h-[300px] mt-12 sm:mt-0">
+      {/* Badlav: height ko 350px kiya mobile ke liye */}
+      <div className="w-full h-[350px] sm:h-[300px] mt-12 sm:mt-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+            margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
             <defs>
               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -189,7 +191,9 @@ export default function BalanceChart({ transactions }) {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#475569", fontSize: 10, fontWeight: 800 }}
-              dy={10}
+              // dy={20} label ko thoda niche shift karne ke liye
+              dy={20}
+              interval="preserveStartEnd" // Ye dates ko overlap hone se rokega
             />
             <YAxis
               axisLine={false}
